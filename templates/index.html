@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Warehouse Capacity Planner</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+  <div class="app-container">
+    <!-- Header Navigasi Tab -->
+    <header class="app-header">
+      <nav class="nav-tabs">
+        <button class="nav-btn active" data-tab="home">HOME</button>
+        <button class="nav-btn" data-tab="master">MASTER SKU</button>
+        <button class="nav-btn" data-tab="inbound">INB PLAN</button>
+        <button class="nav-btn" data-tab="history">HISTORY</button>
+      </nav>
+    </header>
+
+    <!-- Konten Tab -->
+    <main class="app-content">
+      <!-- TAB 1: HOME -->
+      <section id="tab-home" class="tab-pane active">
+        <div class="cards-grid">
+          <div class="card">
+            <span class="card-label">TOTAL SKU</span>
+            <div class="card-value" id="dash-total-sku">-</div>
+            <span class="card-sub">items in Master SKU</span>
+          </div>
+          <div class="card">
+            <span class="card-label">TOTAL HISTORY</span>
+            <div class="card-value" id="dash-total-history">-</div>
+            <span class="card-sub">upload records</span>
+          </div>
+          <div class="card">
+            <span class="card-label">LAST UPLOAD</span>
+            <div class="card-value-str" id="dash-last-upload">-</div>
+            <span class="card-sub">most recent successful file</span>
+          </div>
+          <div class="card">
+            <span class="card-label">LAST UPLOAD TIME</span>
+            <div class="card-value-str" id="dash-last-time">-</div>
+            <span class="card-sub">file timestamp</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: MASTER SKU -->
+      <section id="tab-master" class="tab-pane">
+        <h2>Master SKU</h2>
+        <div class="cards-grid-2">
+          <div class="card">
+            <span class="card-label">TOTAL ITEMS</span>
+            <div class="card-value" id="master-total-items">-</div>
+            <span class="card-sub">SKUs in master</span>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Item Number</th>
+                <th>Description</th>
+                <th class="text-right">CPP</th>
+              </tr>
+            </thead>
+            <tbody id="sku-table-body">
+              <tr>
+                <td colspan="3" class="text-center">Memuat data...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="upload-box-section">
+          <h3>REPLACE MASTER SKU</h3>
+          <p class="sub-text">Upload a new .xlsx file to fully replace the current Master SKU. Required columns: Item
+            Number, Description, CPP.</p>
+          <div class="upload-dropzone">
+            <input type="file" id="sku-file-input" accept=".xlsx" hidden>
+            <button class="btn btn-secondary" onclick="document.getElementById('sku-file-input').click()">📁
+              Upload</button>
+            <span id="sku-file-name" class="file-text">200MB per file • XLSX</span>
+          </div>
+          <button class="btn btn-outline" id="btn-replace-sku">Upload & Replace</button>
+        </div>
+      </section>
+
+      <!-- TAB 3: INB PLAN -->
+      <section id="tab-inbound" class="tab-pane">
+        <h2>Inbound Planning</h2>
+        <p class="sub-text">Upload an inbound plan and click Process to calculate pallet requirements.</p>
+
+        <div class="inbound-upload-bar">
+          <div class="upload-dropzone-inline">
+            <input type="file" id="inbound-file-input" accept=".xlsx" hidden>
+            <button class="btn btn-secondary" onclick="document.getElementById('inbound-file-input').click()">📁
+              Upload</button>
+            <span id="inbound-file-name" class="file-text">200MB per file • XLSX</span>
+          </div>
+          <button class="btn btn-primary" id="btn-process-inbound">Process</button>
+        </div>
+
+        <div id="inbound-result-section" style="display: none; margin-top: 2rem;">
+          <div class="cards-grid-3">
+            <div class="card">
+              <span class="card-label">TOTAL SKU</span>
+              <div class="card-value" id="res-total-sku">-</div>
+              <span class="card-sub">unique items</span>
+            </div>
+            <div class="card">
+              <span class="card-label">TOTAL QTY CS</span>
+              <div class="card-value" id="res-total-qty">-</div>
+              <span class="card-sub">cartons</span>
+            </div>
+            <div class="card highlight-card">
+              <span class="card-label">TOTAL REQUIRED PALLETS</span>
+              <div class="card-value" id="res-total-pallets">-</div>
+              <span class="card-sub">storage locations needed</span>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Container</th>
+                  <th>Batch</th>
+                  <th>Item Number</th>
+                  <th>Description</th>
+                  <th class="text-right">CPP</th>
+                  <th class="text-right">Qty CS</th>
+                  <th class="text-right">Required Pallets</th>
+                </tr>
+              </thead>
+              <tbody id="inbound-result-tbody"></tbody>
+            </table>
+          </div>
+
+          <button class="btn btn-secondary" id="btn-download-result">⬇ Download Result</button>
+        </div>
+      </section>
+
+      <!-- TAB 4: HISTORY -->
+      <section id="tab-history" class="tab-pane">
+        <h2>Upload History</h2>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Upload Time</th>
+                <th>Original File Name</th>
+                <th class="text-center">Containers</th>
+                <th class="text-right">Qty (CS)</th>
+                <th class="text-right">Required Pallets</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-body">
+              <tr>
+                <td colspan="8" class="text-center">Memuat riwayat...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+
+</html>
