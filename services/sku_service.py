@@ -119,4 +119,15 @@ def _build_upsert(rows: list[dict]):
             },
         )
 
+    if dialect == "sqlite":
+        from sqlalchemy.dialects.sqlite import insert
+        stmt = insert(MasterSKU).values(rows)
+        return stmt.on_conflict_do_update(
+            index_elements=[MasterSKU.item_id],
+            set_={
+                "description": stmt.excluded.description,
+                "cpp": stmt.excluded.cpp
+            }
+        )
+
     raise ServiceError(f"Database '{dialect}' belum didukung untuk UPSERT.")

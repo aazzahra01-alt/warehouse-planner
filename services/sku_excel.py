@@ -1,6 +1,7 @@
 """Membaca & memvalidasi file Excel Master SKU menjadi list baris bersih."""
 import logging
 
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from io import BytesIO
 import pandas as pd
 
