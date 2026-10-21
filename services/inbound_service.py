@@ -33,6 +33,7 @@ def process_inbound_file(file_storage):
             raise ValidationError("File harus berformat .xlsx.")
 
         try:
+            file_bytes = BytesIO(file_storage.read())
             df = pd.read_excel(file_storage.stream, sheet_name=0, dtype=str, engine="openpyxl")
         except Exception:
             raise ValidationError("File Excel tidak dapat dibaca. Pastikan format file .xlsx valid.")
