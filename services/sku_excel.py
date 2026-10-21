@@ -1,6 +1,7 @@
 """Membaca & memvalidasi file Excel Master SKU menjadi list baris bersih."""
 import logging
 
+from io import BytesIO
 import pandas as pd
 
 from services.exceptions import ValidationError
@@ -29,8 +30,9 @@ def parse_sku_file(file_storage) -> list[dict]:
 
     try:
         # dtype=str menjaga item_id seperti '000123' tidak berubah jadi angka
-        frame = pd.read_excel(file_storage.stream, sheet_name=0, dtype=str, engine="openpyxl")
-    except Exception:  # file korup / bukan xlsx asli: apa pun penyebabnya, jawabannya 400
+        file_bytes = BytesIO(file_storage.read())
+        frame = pd.read_excel(file_bytes, sheet_name=0, dtype=str, engine="openpyxl")
+    except Exception as exc:  # file korup / bukan xlsx asli: apa pun penyebabnya, jawabannya 400
         logger.exception("Gagal membaca file Excel Master SKU")
         raise ValidationError("File tidak dapat dibaca. Pastikan file adalah Excel (.xlsx) yang valid.")
 
